@@ -219,8 +219,9 @@ footer{background:#0f172a;color:#94a3b8;text-align:center;padding:2.2rem;margin-
     <li><a id="nav-videos" onclick="switchPage('videos')">Social Videos</a></li>
     <li><a id="nav-contact" onclick="switchPage('contact')">Location &amp; Contact</a></li>
     <li><a id="nav-protocols" onclick="switchPage('protocols')">Protocols</a></li>
-    <li><a id="nav-notes" onclick="switchPage('notes')">Notes</a></li>
-    <li><a id="nav-timetable" onclick="switchPage('timetable')">Time Table Updates</a></li>
+    <li><a id="nav-therapist-login" onclick="switchPage('therapist-login')">Therapist Login</a></li>
+    <li><a id="nav-notes" onclick="openTherapistPage('notes')">Notes</a></li>
+    <li><a id="nav-timetable" onclick="openTherapistPage('timetable')">Time Table Updates</a></li>
     <li><a class="btn-nav-book" onclick="openTherapistChat()"><i class="fa-regular fa-calendar-check"></i> Book Appointment</a></li>
   </ul>
 </div>
@@ -502,32 +503,47 @@ footer{background:#0f172a;color:#94a3b8;text-align:center;padding:2.2rem;margin-
   </div>
 </div>
 
+<!-- THERAPIST LOGIN -->
+<div id="page-therapist-login" class="page">
+  <div class="page-heading"><div class="eyebrow">Secure Access</div><h1>Therapist Login</h1><p>Sign in to access Client Notes and Time Table Updates.</p></div>
+  <div class="extra-card" style="max-width:520px;margin:auto;">
+    <form onsubmit="therapistLogin(event)">
+      <div class="extra-form" style="display:grid;grid-template-columns:1fr;">
+        <input id="therapistEmail" type="email" placeholder="Therapist email" autocomplete="username" required>
+        <input id="therapistPassword" type="password" placeholder="Password" autocomplete="current-password" required>
+        <button class="primary-btn" type="submit">Log In</button>
+      </div>
+      <p id="loginError" class="muted-note"></p>
+    </form>
+  </div>
+</div>
+
 <!-- NOTES -->
 <div id="page-notes" class="page">
-  <div class="page-heading"><div class="eyebrow">Therapist Access</div><h1>Client Notes</h1><p>Therapist workspace for notes and follow-up information.</p></div>
+  <div class="page-heading"><div class="eyebrow">Therapist Access</div><h1>Client Notes</h1><p>Therapist workspace for notes and follow-up information.</p><button class="primary-btn" onclick="therapistLogout()">Log Out</button></div>
   <div class="extra-card">
     <div class="extra-form"><input id="nclient" placeholder="Client name / ID"><input id="ndate" type="date"></div>
     <textarea id="ntext" placeholder="Therapist notes, observations, goals, homework and follow-up..."></textarea>
     <div class="extra-form"><button class="primary-btn" onclick="saveN()">Save Note</button></div>
     <div id="nlist" class="extra-list"></div>
-    <p class="muted-note">Demo mode: notes are stored only in this browser. A real clinic system should use therapist authentication and a secure database before storing real client information.</p>
+    <p class="muted-note">Login is protected by Supabase authentication. Notes are still stored only in this browser until a secure database is added.</p>
   </div>
 </div>
 
 <!-- TIME TABLE UPDATES -->
 <div id="page-timetable" class="page">
-  <div class="page-heading"><div class="eyebrow">Therapist Access</div><h1>Time Table Updates</h1><p>Create and update client appointment slots.</p></div>
+  <div class="page-heading"><div class="eyebrow">Therapist Access</div><h1>Time Table Updates</h1><p>Create and update client appointment slots.</p><button class="primary-btn" onclick="therapistLogout()">Log Out</button></div>
   <div class="extra-card">
     <div class="extra-form"><input id="tclient" placeholder="Client name / ID"><input id="tdate" type="date"><input id="ttime" type="time" value="17:10"><select id="ttype"><option>In-person session</option><option>Online session</option><option>Follow-up</option><option>Assessment</option></select><button class="primary-btn" onclick="saveT()">Add Slot</button></div>
     <div id="tlist" class="extra-list"></div>
-    <p class="muted-note">Demo mode: timetable entries are stored only in this browser. A production clinic system should use secure authenticated access.</p>
+    <p class="muted-note">Login is protected by Supabase authentication. Timetable entries are still stored only in this browser until a secure database is added.</p>
   </div>
 </div>
 
 <footer>
   <div class="footer-brand">SPW • Speech Wellness Clinic</div>
   <div>Ms. Sadaf Imran — Speech Therapist</div>
-  <div class="footer-links"><a onclick="switchPage('home')">Home</a><a onclick="switchPage('about')">About</a><a onclick="switchPage('services')">Services</a><a onclick="switchPage('patients')">Patient Help</a><a onclick="switchPage('videos')">Social Videos</a><a onclick="switchPage('contact')">Location</a><a onclick="switchPage('protocols')">Protocols</a><a onclick="switchPage('notes')">Notes</a><a onclick="switchPage('timetable')">Time Table Updates</a><a onclick="openTherapistChat()">Appointments</a></div>
+  <div class="footer-links"><a onclick="switchPage('home')">Home</a><a onclick="switchPage('about')">About</a><a onclick="switchPage('services')">Services</a><a onclick="switchPage('patients')">Patient Help</a><a onclick="switchPage('videos')">Social Videos</a><a onclick="switchPage('contact')">Location</a><a onclick="switchPage('protocols')">Protocols</a><a onclick="switchPage('therapist-login')">Therapist Login</a><a onclick="openTherapistPage('notes')">Notes</a><a onclick="openTherapistPage('timetable')">Time Table Updates</a><a onclick="openTherapistChat()">Appointments</a></div>
   <div>Karachi, Sindh, Pakistan • +92 316 1279258</div>
   <div class="source-line">Public information checked against Marham, Little Pure Souls and Sadaf Imran’s public LinkedIn/Facebook presence.</div><div class="disclaimer">This website is a front-end informational and appointment-request interface. It does not provide medical diagnosis. Educational videos are third-party content. Appointment confirmation is handled directly with the clinic.</div>
 </footer>
@@ -535,13 +551,40 @@ footer{background:#0f172a;color:#94a3b8;text-align:center;padding:2.2rem;margin-
 <button class="float-chat" onclick="openTherapistChat()" aria-label="Open appointment chat"><i class="fa-brands fa-whatsapp"></i></button>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const pageIds=['home','about','services','patients','videos','contact','appointment','protocols','notes','timetable'];
+const SUPABASE_URL='https://rcjmwbdnvywxlenuoahm.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_W_MixrxO1_3cHDhpoSCxjA_XeWeZ6qW';
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+
+const pageIds=['home','about','services','videos','patients','contact','appointment','protocols','therapist-login','notes','timetable'];
 function switchPage(page){
   pageIds.forEach(p=>{const el=document.getElementById('page-'+p);if(el)el.classList.toggle('active-page',p===page);const nav=document.getElementById('nav-'+p);if(nav)nav.classList.toggle('active',p===page)});
   document.getElementById('navLinks').classList.remove('open');
   window.scrollTo({top:0,behavior:'smooth'});
   history.pushState({page},'', '#'+page);
+}
+async function openTherapistPage(page){
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(!session){switchPage('therapist-login');showToast('Please log in as the therapist first.');return;}
+  switchPage(page);
+}
+async function therapistLogin(e){
+  e.preventDefault();
+  const email=document.getElementById('therapistEmail').value.trim();
+  const password=document.getElementById('therapistPassword').value;
+  const errorBox=document.getElementById('loginError');
+  errorBox.textContent='';
+  const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error){errorBox.textContent='Incorrect email or password.';return;}
+  document.getElementById('therapistPassword').value='';
+  showToast('Therapist login successful.');
+  switchPage('notes');
+}
+async function therapistLogout(){
+  await supabaseClient.auth.signOut();
+  switchPage('therapist-login');
+  showToast('Logged out.');
 }
 function openTherapistChat(){switchPage('appointment')}
 function toggleMenu(){document.getElementById('navLinks').classList.toggle('open')}
@@ -550,9 +593,9 @@ function searchKnowledge(){const q=document.getElementById('knowledgeSearch').va
 function sendQuickMessage(){const input=document.getElementById('chatInput');const text=input.value.trim();if(!text)return;const body=document.getElementById('chatBody');const row=document.createElement('div');row.className='message-row user';row.innerHTML='<div class="message">'+escapeHtml(text)+'<span class="message-time">Just now</span></div>';body.appendChild(row);input.value='';body.scrollTop=body.scrollHeight;showToast('Message added. Use the WhatsApp button in the appointment form to contact the clinic.');}
 function escapeHtml(s){return s.replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function sendAppointment(e){e.preventDefault();const name=document.getElementById('patientName').value.trim();const phone=document.getElementById('patientPhone').value.trim();const date=document.getElementById('appointmentDate').value;const time=document.getElementById('appointmentTime').value;const type=document.getElementById('appointmentType').value;const note=document.getElementById('appointmentNote').value.trim();const text=`Assalam-o-Alaikum Ms. Sadaf Imran, I would like to request an appointment.%0A%0AName: ${encodeURIComponent(name)}%0APhone: ${encodeURIComponent(phone)}%0APreferred date: ${encodeURIComponent(date)}%0APreferred time: ${encodeURIComponent(time)}%0AConsultation: ${encodeURIComponent(type)}%0AMessage: ${encodeURIComponent(note||'No additional message.')}`;window.open('https://wa.me/923161279258?text='+text,'_blank');showToast('WhatsApp appointment message prepared.');}
-function loadHash(){const p=location.hash.replace('#','');if(pageIds.includes(p))switchPageNoHistory(p);else switchPageNoHistory('home')}
+async function loadHash(){const p=location.hash.replace('#','');if(p==='notes'||p==='timetable'){const {data:{session}}=await supabaseClient.auth.getSession();if(!session){switchPageNoHistory('therapist-login');return;}}if(pageIds.includes(p))switchPageNoHistory(p);else switchPageNoHistory('home')}
 function switchPageNoHistory(page){pageIds.forEach(p=>{const el=document.getElementById('page-'+p);if(el)el.classList.toggle('active-page',p===page);const nav=document.getElementById('nav-'+p);if(nav)nav.classList.toggle('active',p===page)});window.scrollTo(0,0)}
-window.addEventListener('popstate',e=>{switchPageNoHistory(e.state?.page||location.hash.replace('#','')||'home')});window.addEventListener('load',loadHash);
+window.addEventListener('popstate',async e=>{const p=e.state?.page||location.hash.replace('#','')||'home';if(p==='notes'||p==='timetable'){const {data:{session}}=await supabaseClient.auth.getSession();if(!session){switchPageNoHistory('therapist-login');return;}}switchPageNoHistory(p)});window.addEventListener('load',loadHash);
 </script>
 
 <script>
